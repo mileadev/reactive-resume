@@ -24,7 +24,19 @@ describe("validateProductionEnvironment", () => {
 		);
 	});
 
-	it("rejects security bypass flags", () => {
+	it("permits loopback evaluation with disposable development secrets", () => {
+		expect(() =>
+			validateProductionEnvironment(
+				valid({
+					APP_URL: "http://localhost:3000",
+					AUTH_SECRET: "change-me-to-a-secure-secret-key-in-production",
+					ENCRYPTION_SECRET: "change-me-to-a-secure-agent-secret-in-production",
+				}),
+			),
+		).not.toThrow();
+	});
+
+	it("rejects security bypass flags for public deployments", () => {
 		expect(() => validateProductionEnvironment(valid({ FLAG_DISABLE_API_RATE_LIMIT: true }))).toThrow(
 			"FLAG_DISABLE_API_RATE_LIMIT",
 		);
@@ -33,11 +45,27 @@ describe("validateProductionEnvironment", () => {
 		);
 	});
 
-	it("rejects incomplete credential pairs", () => {
+	it("permits explicit bypass flags only for loopback evaluation", () => {
+		expect(() =>
+			validateProductionEnvironment(
+				valid({
+					APP_URL: "http://127.0.0.1:3000",
+					AUTH_SECRET: "dev",
+					FLAG_DISABLE_API_RATE_LIMIT: true,
+					FLAG_ALLOW_UNSAFE_OAUTH_REDIRECT_URI: true,
+				}),
+			),
+		).not.toThrow();
+	});
+
+	it("rejects incomplete credential pairs in every mode", () => {
 		expect(() => validateProductionEnvironment(valid({ S3_ACCESS_KEY_ID: "id" }))).toThrow("S3 credentials");
 		expect(() => validateProductionEnvironment(valid({ SMTP_PASS: "password" }))).toThrow("SMTP credentials");
 		expect(() => validateProductionEnvironment(valid({ OAUTH_CLIENT_ID: "client" }))).toThrow(
 			"Custom OAuth credentials",
 		);
+		expect(() =>
+			validateProductionEnvironment(valid({ APP_URL: "http://localhost:3000", S3_ACCESS_KEY_ID: "id" })),
+		).toThrow("S3 credentials");
 	});
 });
