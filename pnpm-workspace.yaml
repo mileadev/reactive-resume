@@ -2,7 +2,10 @@ packages:
   - apps/*
   - packages/*
   - tooling
-minimumReleaseAge: 0
+# Quarantine newly published dependency versions for 24 hours. This reduces
+# exposure to supply-chain compromises while still allowing deliberate pins
+# for urgent security updates when reviewed explicitly.
+minimumReleaseAge: 1440
 allowBuilds:
   bcrypt: true
   esbuild: true
