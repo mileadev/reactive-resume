@@ -12,6 +12,7 @@
 		"./features/resume/public-pdf": "./src/features/resume/public-pdf.ts",
 		"./features/resume/social-meta": "./src/features/resume/social-meta.ts",
 		"./features/storage": "./src/features/storage/index.ts",
+		"./observability": "./src/observability/index.ts",
 		"./routers": "./src/routers/index.ts"
 	},
 	"scripts": {
