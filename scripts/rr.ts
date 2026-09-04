@@ -4,9 +4,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { detectResumeImportFormat, importResume, type ResumeImportFormat } from "../packages/import/src/registry";
-import { resumeToolkit } from "../packages/resume/src/toolkit";
 import { jsonPatchOperationSchema, type JsonPatchOperation } from "../packages/resume/src/patch";
-import z from "zod";
+import { resumeToolkit } from "../packages/resume/src/toolkit";
 
 type Options = Record<string, string | boolean>;
 
@@ -153,7 +152,11 @@ async function commandDoctor(): Promise<void> {
 	const nodeMajor = Number.parseInt(process.versions.node.split(".")[0] ?? "0", 10);
 	const checks = [
 		{ name: "node", ok: nodeMajor >= 24, detail: process.versions.node },
-		{ name: "runtime", ok: typeof structuredClone === "function" && typeof fetch === "function", detail: "fetch + structuredClone" },
+		{
+			name: "runtime",
+			ok: typeof structuredClone === "function" && typeof fetch === "function",
+			detail: "fetch + structuredClone",
+		},
 		{ name: "mode", ok: true, detail: "local commands are network-free" },
 	];
 	const ok = checks.every((check) => check.ok);
@@ -182,12 +185,12 @@ async function commandInspect(file: string, pretty: boolean): Promise<void> {
 
 	const summary = imported
 		? {
-			name: imported.data.basics.name,
-			headline: imported.data.basics.headline,
-			sections: Object.keys(imported.data.sections).length + imported.data.customSections.length + 1,
-			warnings: imported.warnings,
-			provenance: imported.provenance,
-		}
+				name: imported.data.basics.name,
+				headline: imported.data.basics.headline,
+				sections: Object.keys(imported.data.sections).length + imported.data.customSections.length + 1,
+				warnings: imported.warnings,
+				provenance: imported.provenance,
+			}
 		: null;
 
 	process.stdout.write(`${formatJson({ file: path.resolve(file), candidates, summary }, pretty)}\n`);
@@ -200,10 +203,7 @@ async function commandAts(file: string, from: string | undefined, pretty: boolea
 	process.stdout.write(`${formatJson({ import: imported.provenance, ...result }, pretty)}\n`);
 }
 
-async function commandConvert(
-	file: string,
-	options: Options,
-): Promise<void> {
+async function commandConvert(file: string, options: Options): Promise<void> {
 	const to = optionString(options, "to") ?? "json";
 	const imported = await loadResume(file, optionString(options, "from"));
 	const output = optionString(options, "output");
@@ -239,7 +239,8 @@ async function commandConvert(
 async function commandPatch(file: string, patchFile: string, output?: string): Promise<void> {
 	const imported = await loadResume(file);
 	const rawOperations = await readJson(patchFile);
-	const operations = z.array(jsonPatchOperationSchema).parse(rawOperations);
+	if (!Array.isArray(rawOperations)) throw new Error("Patch file must contain a JSON array of RFC 6902 operations.");
+	const operations = rawOperations.map((operation) => jsonPatchOperationSchema.parse(operation));
 	const patched = resumeToolkit.patch(imported.data, operations);
 	await writeOutput(output, formatJson(patched, true));
 }
