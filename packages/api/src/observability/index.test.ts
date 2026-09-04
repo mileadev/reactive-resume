@@ -35,10 +35,13 @@ describe("operation telemetry", () => {
 
 	it("records errors and rethrows the original failure", async () => {
 		const sink = vi.fn();
-		const telemetry = new OperationTelemetry({ sink, clock: (() => {
-			let tick = 0;
-			return () => (tick += 1);
-		})() });
+		const telemetry = new OperationTelemetry({
+			sink,
+			clock: (() => {
+				let tick = 0;
+				return () => (tick += 1);
+			})(),
+		});
 		const failure = new TypeError("boom");
 
 		await expect(telemetry.run("pdf.render", {}, () => Promise.reject(failure))).rejects.toBe(failure);
