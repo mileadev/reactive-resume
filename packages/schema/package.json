@@ -8,6 +8,7 @@
 		"./automation/*": "./src/automation/*.ts",
 		"./career/*": "./src/career/*.ts",
 		"./icons": "./src/icons.ts",
+		"./plugins/*": "./src/plugins/*.ts",
 		"./resume/stylesheet": "./src/resume/stylesheet.ts",
 		"./resume/*": "./src/resume/*.ts",
 		"./schema.json": "./schema.json",
