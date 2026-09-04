@@ -1,11 +1,13 @@
 import z from "zod";
-import { protectedProcedure } from "../../context";
+import { scopedProcedure } from "../../context";
 import { storageUploadRateLimit } from "../../middleware/rate-limit";
 import { mapAgentEnvironmentError } from "./routing";
 import { agentService } from "./service";
 
+const runAgent = scopedProcedure("agent", "run");
+
 export const attachmentsRouter = {
-	create: protectedProcedure
+	create: runAgent
 		.route({
 			method: "POST",
 			path: "/agent/attachments",
@@ -33,7 +35,7 @@ export const attachmentsRouter = {
 			}),
 		),
 
-	delete: protectedProcedure
+	delete: runAgent
 		.route({
 			method: "DELETE",
 			path: "/agent/attachments/{id}",
