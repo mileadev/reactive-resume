@@ -2,7 +2,7 @@ import { ORPCError } from "@orpc/client";
 import { generateText } from "ai";
 import z from "zod";
 import { generateId, slugify } from "@reactive-resume/utils/string";
-import { protectedProcedure } from "../../context";
+import { scopedProcedure } from "../../context";
 import { aiRequestRateLimit } from "../../middleware/rate-limit";
 import { generateJson } from "../ai/generate-json";
 import { getModel } from "../ai/service";
@@ -12,6 +12,7 @@ import { applicationService } from "./service";
 
 const reserved = { tags: ["Applications", "AI"] } as const;
 const MAX_PASTED_JOB_DESCRIPTION_CHARS = 20_000;
+const runAgent = scopedProcedure("agent", "run");
 
 // Resolve the user's default (tested + enabled) AI provider into a ready model instance.
 async function resolveModel(userId: string) {
@@ -64,7 +65,7 @@ const matchScoreOutput = z.object({
 export const aiRouter = {
 	// Extract structured fields from a pasted job description. The posting text itself is stored
 	// verbatim on the application, so nothing here fetches or scrapes a URL.
-	autofill: protectedProcedure
+	autofill: runAgent
 		.route({ method: "POST", path: "/applications/ai/autofill", operationId: "aiAutofillApplication", ...reserved })
 		.input(autofillInputSchema)
 		.use(aiRequestRateLimit)
@@ -82,7 +83,7 @@ export const aiRouter = {
 		}),
 
 	// Score the linked resume against the application's job description.
-	matchScore: protectedProcedure
+	matchScore: runAgent
 		.route({
 			method: "POST",
 			path: "/applications/{id}/ai/match-score",
@@ -124,7 +125,7 @@ export const aiRouter = {
 		}),
 
 	// Generate a cover letter or recruiter follow-up from the application + resume context.
-	draftMessage: protectedProcedure
+	draftMessage: runAgent
 		.route({
 			method: "POST",
 			path: "/applications/{id}/ai/draft-message",
@@ -152,7 +153,7 @@ export const aiRouter = {
 		}),
 
 	// Create a tailored copy of the linked resume (job-specific summary) and link it to the application.
-	tailorResume: protectedProcedure
+	tailorResume: runAgent
 		.route({
 			method: "POST",
 			path: "/applications/{id}/ai/tailor-resume",
