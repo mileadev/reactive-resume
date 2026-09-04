@@ -2,10 +2,13 @@ import type { AiProviderResponse } from "./service";
 import { ORPCError } from "@orpc/client";
 import { type } from "@orpc/server";
 import z from "zod";
-import { protectedProcedure } from "../../context";
+import { scopedProcedure } from "../../context";
 import { aiRequestRateLimit } from "../../middleware/rate-limit";
 import { providerInput, updateProviderInput } from "./inputs";
 import { aiProvidersService } from "./service";
+
+const readAiProvider = scopedProcedure("aiProvider", "read");
+const writeAiProvider = scopedProcedure("aiProvider", "write");
 
 function isInvalidAiBaseUrl(error: unknown) {
 	return error instanceof Error && error.message === "INVALID_AI_BASE_URL";
@@ -16,7 +19,7 @@ function throwInvalidProviderConfig(): never {
 }
 
 export const aiProvidersRouter = {
-	list: protectedProcedure
+	list: readAiProvider
 		.route({
 			method: "GET",
 			path: "/ai-providers",
@@ -31,7 +34,7 @@ export const aiProvidersRouter = {
 		})
 		.handler(({ context }) => aiProvidersService.list({ userId: context.user.id })),
 
-	create: protectedProcedure
+	create: writeAiProvider
 		.route({
 			method: "POST",
 			path: "/ai-providers",
@@ -62,7 +65,7 @@ export const aiProvidersRouter = {
 			}
 		}),
 
-	update: protectedProcedure
+	update: writeAiProvider
 		.route({
 			method: "PATCH",
 			path: "/ai-providers/{id}",
@@ -97,7 +100,7 @@ export const aiProvidersRouter = {
 			}
 		}),
 
-	delete: protectedProcedure
+	delete: writeAiProvider
 		.route({
 			method: "DELETE",
 			path: "/ai-providers/{id}",
@@ -113,7 +116,7 @@ export const aiProvidersRouter = {
 		})
 		.handler(({ context, input }) => aiProvidersService.delete({ id: input.id, userId: context.user.id })),
 
-	test: protectedProcedure
+	test: writeAiProvider
 		.route({
 			method: "POST",
 			path: "/ai-providers/{id}/test",

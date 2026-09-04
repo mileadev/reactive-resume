@@ -2,6 +2,7 @@ import { isAbsolute, join } from "node:path";
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 import { findWorkspaceRoot } from "@reactive-resume/utils/monorepo.node";
+import { validateProductionEnvironment } from "./production-validation";
 
 const workspaceRoot = findWorkspaceRoot();
 
@@ -15,7 +16,7 @@ if (workspaceRoot) {
 	}
 }
 
-export const env = createEnv({
+const parsedEnv = createEnv({
 	server: {
 		// Application
 		APP_URL: z.url({ protocol: /https?/ }),
@@ -87,3 +88,7 @@ export const env = createEnv({
 	runtimeEnv: process.env,
 	emptyStringAsUndefined: true,
 });
+
+if (process.env.NODE_ENV === "production") validateProductionEnvironment(parsedEnv);
+
+export const env = parsedEnv;

@@ -59,12 +59,16 @@ function isPublicResumePath(pathname: string): boolean {
 	return segments.length === 2 && firstSegment !== undefined && !reservedPublicResumeSegments.has(firstSegment);
 }
 
+const CONTENT_SECURITY_POLICY =
+	"default-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'";
+
 const BASE_SECURITY_HEADERS = {
 	"X-Frame-Options": "DENY",
 	"X-Content-Type-Options": "nosniff",
 	"Referrer-Policy": "strict-origin-when-cross-origin",
-	"Content-Security-Policy-Report-Only":
-		"default-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
+	"Content-Security-Policy": CONTENT_SECURITY_POLICY,
+	"Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=()",
+	"Strict-Transport-Security": "max-age=31536000; includeSubDomains",
 };
 
 const ROOT_TITLE = "Reactive Resume — A free and open-source resume builder";

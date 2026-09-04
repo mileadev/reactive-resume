@@ -31,6 +31,7 @@
 		"dev": "turbo run dev",
 		"dev:web": "turbo run dev --filter=web",
 		"knip": "knip",
+		"rr": "pnpm --filter @reactive-resume/resume exec tsx ../../scripts/rr.ts",
 		"start": "node apps/server/dist/index.mjs",
 		"typecheck": "turbo run typecheck",
 		"test": "turbo run test --concurrency=4",

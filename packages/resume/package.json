@@ -5,6 +5,7 @@
 	"private": true,
 	"exports": {
 		"./ats": "./src/ats/index.ts",
+		"./ats-engine": "./src/ats/engine.ts",
 		"./ats-pdf": "./src/ats-pdf/index.ts",
 		"./export-sections": "./src/export-sections.ts",
 		"./icons": "./src/icons.ts",
@@ -13,7 +14,8 @@
 		"./social-meta": "./src/social-meta.ts",
 		"./stylesheet": "./src/stylesheet/index.ts",
 		"./stylesheet/registry": "./src/stylesheet/registry/index.ts",
-		"./stylesheet/types": "./src/stylesheet/semantic-types.ts"
+		"./stylesheet/types": "./src/stylesheet/semantic-types.ts",
+		"./toolkit": "./src/toolkit.ts"
 	},
 	"scripts": {
 		"typecheck": "tsgo --noEmit",

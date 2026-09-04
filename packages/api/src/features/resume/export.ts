@@ -3,7 +3,7 @@ import { ORPCError } from "@orpc/server";
 import z from "zod";
 import { getResumeExportData, resumeHasCoverLetter } from "@reactive-resume/resume/export-sections";
 import { generateFilename } from "@reactive-resume/utils/file";
-import { protectedProcedure } from "../../context";
+import { scopedProcedure } from "../../context";
 import { pdfExportRateLimit } from "../../middleware/rate-limit";
 import { parseStoredResumeData } from "./resume-data-validation";
 import { resumeService } from "./service";
@@ -50,7 +50,7 @@ export async function createResumePdfDownload(input: CreateResumePdfDownloadInpu
 	}
 }
 
-export const downloadResumePdfProcedure = protectedProcedure
+export const downloadResumePdfProcedure = scopedProcedure("resume", "export")
 	.route({
 		method: "GET",
 		path: "/resumes/{id}/pdf",

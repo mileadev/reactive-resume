@@ -211,13 +211,16 @@ describe("web app fallback classification", () => {
 		expect(unversionedHeaders.get("Cache-Control")).toBeNull();
 	});
 
-	it.each(["/", "/alice/resume"])("sets framing and report-only CSP security headers on %s", async (pathname) => {
+	it.each(["/", "/alice/resume"])("sets enforced browser security headers on %s", async (pathname) => {
 		const response = await handleWebApp(new Request(`https://example.com${pathname}`));
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get("X-Frame-Options")).toBe("DENY");
 		expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
-		expect(response.headers.get("Content-Security-Policy-Report-Only")).toContain("frame-ancestors 'none'");
+		expect(response.headers.get("Content-Security-Policy")).toContain("frame-ancestors 'none'");
+		expect(response.headers.get("Content-Security-Policy-Report-Only")).toBeNull();
+		expect(response.headers.get("Permissions-Policy")).toContain("camera=()");
+		expect(response.headers.get("Strict-Transport-Security")).toContain("max-age=31536000");
 	});
 
 	it.each(["/auth/login", "/dashboard", "/builder/resume-1", "/agent", "/templates", "/templates/azurill.pdf"])(

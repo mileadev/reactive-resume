@@ -22,6 +22,7 @@ import { env } from "@reactive-resume/env/server";
 import { rateLimitConfig, TRUSTED_IP_HEADERS } from "@reactive-resume/utils/rate-limit";
 import { generateId, toUsername } from "@reactive-resume/utils/string";
 import { isAllowedOAuthRedirectUri } from "@reactive-resume/utils/url-security.node";
+import { API_KEY_DEFAULT_PERMISSIONS } from "./api-key-permissions";
 import { createGithubProfileMapper, createProfileMapper } from "./oauth-profile";
 import { getTrustedOrigins } from "./trusted-origins";
 
@@ -294,6 +295,7 @@ const getAuthConfig = () => {
 			twoFactor({ issuer: "Reactive Resume" }),
 			apiKey({
 				enableSessionForAPIKeys: true,
+				permissions: { defaultPermissions: API_KEY_DEFAULT_PERMISSIONS },
 				rateLimit: {
 					...rateLimitConfig.betterAuth.apiKey,
 					enabled: isRateLimitEnabled,

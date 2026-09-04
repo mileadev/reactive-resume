@@ -4,6 +4,7 @@
 	"type": "module",
 	"private": true,
 	"exports": {
+		"./capabilities": "./src/capabilities/index.ts",
 		"./context": "./src/context.ts",
 		"./features/agent/runs": "./src/features/agent/runs.ts",
 		"./features/flags": "./src/features/flags/index.ts",
@@ -11,6 +12,7 @@
 		"./features/resume/public-pdf": "./src/features/resume/public-pdf.ts",
 		"./features/resume/social-meta": "./src/features/resume/social-meta.ts",
 		"./features/storage": "./src/features/storage/index.ts",
+		"./observability": "./src/observability/index.ts",
 		"./routers": "./src/routers/index.ts"
 	},
 	"scripts": {

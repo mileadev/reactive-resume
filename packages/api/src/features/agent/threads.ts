@@ -1,10 +1,12 @@
 import z from "zod";
-import { protectedProcedure } from "../../context";
+import { scopedProcedure } from "../../context";
 import { mapAgentEnvironmentError } from "./routing";
 import { agentService } from "./service";
 
+const runAgent = scopedProcedure("agent", "run");
+
 export const threadsRouter = {
-	list: protectedProcedure
+	list: runAgent
 		.route({
 			method: "GET",
 			path: "/agent/threads",
@@ -15,7 +17,7 @@ export const threadsRouter = {
 		.use(mapAgentEnvironmentError)
 		.handler(({ context }) => agentService.threads.list({ userId: context.user.id })),
 
-	create: protectedProcedure
+	create: runAgent
 		.route({
 			method: "POST",
 			path: "/agent/threads",
@@ -34,7 +36,7 @@ export const threadsRouter = {
 			}),
 		),
 
-	getOrCreateForResume: protectedProcedure
+	getOrCreateForResume: runAgent
 		.route({
 			method: "POST",
 			path: "/agent/threads/for-resume",
@@ -52,7 +54,7 @@ export const threadsRouter = {
 			}),
 		),
 
-	get: protectedProcedure
+	get: runAgent
 		.route({
 			method: "GET",
 			path: "/agent/threads/{id}",
@@ -64,7 +66,7 @@ export const threadsRouter = {
 		.use(mapAgentEnvironmentError)
 		.handler(({ context, input }) => agentService.threads.get({ id: input.id, userId: context.user.id })),
 
-	update: protectedProcedure
+	update: runAgent
 		.route({
 			method: "PATCH",
 			path: "/agent/threads/{id}",
@@ -82,7 +84,7 @@ export const threadsRouter = {
 			}),
 		),
 
-	archive: protectedProcedure
+	archive: runAgent
 		.route({
 			method: "POST",
 			path: "/agent/threads/{id}/archive",
@@ -95,7 +97,7 @@ export const threadsRouter = {
 		.use(mapAgentEnvironmentError)
 		.handler(({ context, input }) => agentService.threads.archive({ id: input.id, userId: context.user.id })),
 
-	delete: protectedProcedure
+	delete: runAgent
 		.route({
 			method: "DELETE",
 			path: "/agent/threads/{id}",

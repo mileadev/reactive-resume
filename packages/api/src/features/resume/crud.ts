@@ -1,13 +1,18 @@
 import { generateId, generateRandomName, slugify } from "@reactive-resume/utils/string";
-import { protectedProcedure } from "../../context";
+import { scopedProcedure } from "../../context";
 import { resumeDto } from "../../dto/resume";
 import { resumeMutationRateLimit } from "../../middleware/rate-limit";
 import { createResumeData } from "./initial-data";
 import { parseStoredResumeData } from "./resume-data-validation";
 import { resumeService } from "./service";
 
+const readResume = scopedProcedure("resume", "read");
+const createResume = scopedProcedure("resume", "create");
+const writeResume = scopedProcedure("resume", "write");
+const deleteResume = scopedProcedure("resume", "delete");
+
 export const crudRouter = {
-	list: protectedProcedure
+	list: readResume
 		.route({
 			method: "GET",
 			path: "/resumes",
@@ -28,7 +33,7 @@ export const crudRouter = {
 			}),
 		),
 
-	getById: protectedProcedure
+	getById: readResume
 		.route({
 			method: "GET",
 			path: "/resumes/{id}",
@@ -43,7 +48,7 @@ export const crudRouter = {
 		.output(resumeDto.getById.output)
 		.handler(({ context, input }) => resumeService.getById({ id: input.id, userId: context.user.id })),
 
-	create: protectedProcedure
+	create: createResume
 		.route({
 			method: "POST",
 			path: "/resumes",
@@ -78,7 +83,7 @@ export const crudRouter = {
 			}),
 		),
 
-	import: protectedProcedure
+	import: createResume
 		.route({
 			method: "POST",
 			path: "/resumes/import",
@@ -125,7 +130,7 @@ export const crudRouter = {
 			return id;
 		}),
 
-	update: protectedProcedure
+	update: writeResume
 		.route({
 			method: "PUT",
 			path: "/resumes/{id}",
@@ -157,7 +162,7 @@ export const crudRouter = {
 			}),
 		),
 
-	patch: protectedProcedure
+	patch: writeResume
 		.route({
 			method: "PATCH",
 			path: "/resumes/{id}",
@@ -190,7 +195,7 @@ export const crudRouter = {
 			}),
 		),
 
-	setLocked: protectedProcedure
+	setLocked: writeResume
 		.route({
 			method: "POST",
 			path: "/resumes/{id}/lock",
@@ -212,7 +217,7 @@ export const crudRouter = {
 			}),
 		),
 
-	duplicate: protectedProcedure
+	duplicate: createResume
 		.route({
 			method: "POST",
 			path: "/resumes/{id}/duplicate",
@@ -240,7 +245,7 @@ export const crudRouter = {
 			});
 		}),
 
-	delete: protectedProcedure
+	delete: deleteResume
 		.route({
 			method: "DELETE",
 			path: "/resumes/{id}",

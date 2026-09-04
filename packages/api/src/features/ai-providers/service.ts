@@ -11,7 +11,7 @@ import {
 	redactEncryptedCredential,
 } from "../ai/credentials";
 import { testConnection } from "../ai/service";
-import { resolveAiBaseUrl } from "../ai/url-policy";
+import { resolveAiBaseUrl, validateAiBaseUrlNetwork } from "../ai/url-policy";
 
 type AiProviderRecord = typeof schema.aiProvider.$inferSelect;
 
@@ -86,6 +86,10 @@ function normalizeBaseUrl(input: { provider: AIProvider; baseURL?: string | null
 	return resolveAiBaseUrl({ provider: input.provider, baseURL: trimmed });
 }
 
+async function validateProviderDestination(input: { provider: AIProvider; baseURL?: string | null }) {
+	await validateAiBaseUrlNetwork({ provider: input.provider, baseURL: input.baseURL });
+}
+
 async function getOwnedProvider(input: { id: string; userId: string }) {
 	const [provider] = await db
 		.select()
@@ -122,6 +126,9 @@ export const aiProvidersService = {
 			throw new ORPCError("BAD_REQUEST", { message: "AI provider must be tested and enabled before use." });
 		}
 
+		const parsedProvider = aiProviderSchema.parse(provider.provider);
+		await validateProviderDestination({ provider: parsedProvider, baseURL: provider.baseUrl });
+
 		return {
 			...toResponse(provider),
 			apiKey: decryptCredential(provider.encryptedApiKey),
@@ -145,13 +152,16 @@ export const aiProvidersService = {
 			.orderBy(asc(schema.aiProvider.createdAt))
 			.limit(1);
 
-		return provider
-			? {
-					...toResponse(provider),
-					apiKey: decryptCredential(provider.encryptedApiKey),
-					baseURL: provider.baseUrl ?? "",
-				}
-			: null;
+		if (!provider) return null;
+
+		const parsedProvider = aiProviderSchema.parse(provider.provider);
+		await validateProviderDestination({ provider: parsedProvider, baseURL: provider.baseUrl });
+
+		return {
+			...toResponse(provider),
+			apiKey: decryptCredential(provider.encryptedApiKey),
+			baseURL: provider.baseUrl ?? "",
+		};
 	},
 
 	create: async (input: CreateAiProviderInput) => {
@@ -225,6 +235,7 @@ export const aiProvidersService = {
 
 		const provider = await getOwnedProvider(input);
 		const parsedProvider = aiProviderSchema.parse(provider.provider);
+		await validateProviderDestination({ provider: parsedProvider, baseURL: provider.baseUrl });
 		const apiKey = decryptCredential(provider.encryptedApiKey);
 
 		try {

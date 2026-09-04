@@ -4,6 +4,7 @@
 	"type": "module",
 	"private": true,
 	"exports": {
+		"./registry": "./src/registry.ts",
 		"./json-resume": "./src/json-resume.tsx",
 		"./reactive-resume-json": "./src/reactive-resume-json.tsx",
 		"./reactive-resume-v4-json": "./src/reactive-resume-v4-json.tsx"

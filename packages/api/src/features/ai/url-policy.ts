@@ -1,7 +1,11 @@
 import type { AIProvider } from "@reactive-resume/ai/types";
 import { AI_PROVIDER_DEFAULT_BASE_URLS } from "@reactive-resume/ai/types";
 import { env } from "@reactive-resume/env/server";
-import { isPrivateOrLoopbackHost, parseUrl } from "@reactive-resume/utils/url-security.node";
+import {
+	assertUrlResolvesToPublicAddresses,
+	isPrivateOrLoopbackHost,
+	parseUrl,
+} from "@reactive-resume/utils/url-security.node";
 
 type ResolveAiBaseUrlInput = {
 	provider: AIProvider;
@@ -28,4 +32,21 @@ export function resolveAiBaseUrl(input: ResolveAiBaseUrlInput) {
 	if (!baseURL) throw new Error("INVALID_AI_BASE_URL");
 
 	return assertSafeUrl(baseURL, "INVALID_AI_BASE_URL", { allowUnsafe: env.FLAG_ALLOW_UNSAFE_AI_BASE_URL });
+}
+
+/**
+ * Validate the resolved network destination immediately before a provider is
+ * tested or used. Literal-host checks alone do not stop an attacker-controlled
+ * hostname from resolving to loopback/private infrastructure.
+ */
+export async function validateAiBaseUrlNetwork(input: ResolveAiBaseUrlInput): Promise<string> {
+	const baseURL = resolveAiBaseUrl(input);
+	if (env.FLAG_ALLOW_UNSAFE_AI_BASE_URL) return baseURL;
+
+	try {
+		await assertUrlResolvesToPublicAddresses(baseURL);
+		return baseURL;
+	} catch {
+		throw new Error("INVALID_AI_BASE_URL");
+	}
 }

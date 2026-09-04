@@ -4,6 +4,7 @@
 	"type": "module",
 	"private": true,
 	"exports": {
+		"./api-key-permissions": "./src/api-key-permissions.ts",
 		"./config": "./src/config.ts",
 		"./types": "./src/types.ts"
 	},
