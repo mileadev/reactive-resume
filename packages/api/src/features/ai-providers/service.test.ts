@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { dbMock, queryMock, queryState } = vi.hoisted(() => {
+const { dbMock, queryMock, queryState, validateAiBaseUrlNetworkMock } = vi.hoisted(() => {
 	const state = {
 		rows: [] as unknown[],
 		whereArg: undefined as unknown,
@@ -23,6 +23,7 @@ const { dbMock, queryMock, queryState } = vi.hoisted(() => {
 		dbMock: { select: vi.fn(() => query) },
 		queryMock: query,
 		queryState: state,
+		validateAiBaseUrlNetworkMock: vi.fn(async () => "https://api.openai.com/v1/"),
 	};
 });
 
@@ -65,7 +66,10 @@ vi.mock("../ai/credentials", () => ({
 	})),
 }));
 vi.mock("../ai/service", () => ({ testConnection: vi.fn() }));
-vi.mock("../ai/url-policy", () => ({ resolveAiBaseUrl: vi.fn() }));
+vi.mock("../ai/url-policy", () => ({
+	resolveAiBaseUrl: vi.fn(),
+	validateAiBaseUrlNetwork: validateAiBaseUrlNetworkMock,
+}));
 
 const { aiProvidersService } = await import("./service");
 
@@ -108,6 +112,7 @@ describe("aiProvidersService", () => {
 			apiKey: "decrypted-key",
 		});
 
+		expect(validateAiBaseUrlNetworkMock).toHaveBeenCalledWith({ provider: "openai", baseURL: null });
 		expect(queryState.whereArg).toEqual({
 			type: "and",
 			conditions: [
