@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-ARG PNPM_VERSION=11.21.0
+ARG PNPM_VERSION=11.25.0
 ARG NODE_VERSION=24
 
 FROM ghcr.io/pnpm/pnpm:${PNPM_VERSION} AS base
@@ -16,7 +16,7 @@ ENV TURBO_TELEMETRY_DISABLED=1
 FROM base AS pruner
 COPY . .
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store,sharing=locked \
-    pnpm dlx turbo@2.9.12 prune web server --docker
+    pnpm dlx turbo@2.10.12 prune web server --docker
 
 FROM base AS builder
 COPY --from=pruner /app/out/json/ ./
@@ -30,7 +30,7 @@ RUN rm -rf apps/web/dist apps/server/dist && pnpm turbo run build --filter=web -
 FROM base AS runtime-pruner
 COPY . .
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store,sharing=locked \
-    pnpm dlx turbo@2.9.12 prune server --docker
+    pnpm dlx turbo@2.10.12 prune server --docker
 
 FROM base AS runtime-deps
 COPY --from=runtime-pruner /app/out/json/ ./
