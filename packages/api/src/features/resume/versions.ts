@@ -1,10 +1,13 @@
-import { protectedProcedure } from "../../context";
+import { scopedProcedure } from "../../context";
 import { resumeDto } from "../../dto/resume";
 import { resumeMutationRateLimit } from "../../middleware/rate-limit";
 import { resumeService } from "./service";
 
+const readResume = scopedProcedure("resume", "read");
+const writeResume = scopedProcedure("resume", "write");
+
 export const versionsRouter = {
-	listVersions: protectedProcedure
+	listVersions: readResume
 		.route({
 			method: "GET",
 			path: "/resumes/{resumeId}/versions",
@@ -21,7 +24,7 @@ export const versionsRouter = {
 			resumeService.versions.list({ resumeId: input.resumeId, userId: context.user.id }),
 		),
 
-	restoreVersion: protectedProcedure
+	restoreVersion: writeResume
 		.route({
 			method: "POST",
 			path: "/resumes/{resumeId}/versions/{versionId}/restore",
