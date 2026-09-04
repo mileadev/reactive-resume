@@ -4,12 +4,14 @@ import { ORPCError } from "@orpc/client";
 import { type } from "@orpc/server";
 import { AISDKError } from "ai";
 import { flattenError, ZodError, z } from "zod";
-import { protectedProcedure } from "../../context";
+import { scopedProcedure } from "../../context";
 import { aiRequestRateLimit } from "../../middleware/rate-limit";
 import { aiProvidersService } from "../ai-providers/service";
 import { resumeService } from "../resume/service";
 import { atsReviewInputSchema, atsReviewOutputSchema, reviewResumeText } from "./ats-review";
 import { aiService, fileInputSchema } from "./service";
+
+const runAgent = scopedProcedure("agent", "run");
 
 function isInvalidAiBaseUrlError(error: unknown): boolean {
 	return error instanceof Error && error.message === "INVALID_AI_BASE_URL";
@@ -56,7 +58,7 @@ async function getRunnableProvider(userId: string, aiProviderId?: string) {
 }
 
 export const aiRouter = {
-	parsePdf: protectedProcedure
+	parsePdf: runAgent
 		.route({
 			method: "POST",
 			path: "/ai/parse-pdf",
@@ -92,7 +94,7 @@ export const aiRouter = {
 			}
 		}),
 
-	parseDocx: protectedProcedure
+	parseDocx: runAgent
 		.route({
 			method: "POST",
 			path: "/ai/parse-docx",
@@ -138,7 +140,7 @@ export const aiRouter = {
 			}
 		}),
 
-	chat: protectedProcedure
+	chat: runAgent
 		.route({
 			method: "POST",
 			path: "/ai/chat",
@@ -180,7 +182,7 @@ export const aiRouter = {
 			}
 		}),
 
-	atsReview: protectedProcedure
+	atsReview: runAgent
 		.route({
 			method: "POST",
 			path: "/ai/ats-review",
