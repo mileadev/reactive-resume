@@ -1,12 +1,14 @@
 import type { UIMessage } from "ai";
 import z from "zod";
-import { protectedProcedure } from "../../context";
+import { scopedProcedure } from "../../context";
 import { aiRequestRateLimit } from "../../middleware/rate-limit";
 import { isUiMessage, mapAgentEnvironmentError } from "./routing";
 import { agentService } from "./service";
 
+const runAgent = scopedProcedure("agent", "run");
+
 export const messagesRouter = {
-	send: protectedProcedure
+	send: runAgent
 		.route({
 			method: "POST",
 			path: "/agent/messages/send",
@@ -32,7 +34,7 @@ export const messagesRouter = {
 			}),
 		),
 
-	stop: protectedProcedure
+	stop: runAgent
 		.route({
 			method: "POST",
 			path: "/agent/messages/stop",
@@ -57,7 +59,7 @@ export const messagesRouter = {
 			}),
 		),
 
-	resume: protectedProcedure
+	resume: runAgent
 		.route({
 			method: "GET",
 			path: "/agent/messages/resume",
