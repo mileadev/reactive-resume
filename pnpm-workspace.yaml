@@ -2,10 +2,13 @@ packages:
   - apps/*
   - packages/*
   - tooling
-# Quarantine newly published dependency versions for 24 hours. This reduces
-# exposure to supply-chain compromises while still allowing deliberate pins
-# for urgent security updates when reviewed explicitly.
+# Delay newly published dependency versions for 24 hours when an older version
+# satisfies the requested range. Explicit strict mode would also reject the
+# existing frozen lockfile when a currently pinned package is younger than the
+# quarantine window, so CI keeps fallback enabled while dependency updates are
+# still resolved through the release-age policy.
 minimumReleaseAge: 1440
+minimumReleaseAgeStrict: false
 allowBuilds:
   bcrypt: true
   esbuild: true
