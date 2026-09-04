@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import type { ZodType } from "zod";
 import type { AuthPrincipal } from "../context";
 import type { CapabilityDescriptor, CapabilityId } from "./catalog";
 import { getCapabilityDescriptor } from "./catalog";
@@ -23,8 +23,8 @@ export interface CapabilityAuditEvent {
 
 export interface CapabilityBinding<TInput, TOutput> {
 	id: CapabilityId;
-	input: z.ZodType<TInput>;
-	output: z.ZodType<TOutput>;
+	input: ZodType<TInput>;
+	output: ZodType<TOutput>;
 	execute(input: TInput, context: CapabilityContext): Promise<TOutput> | TOutput;
 }
 
