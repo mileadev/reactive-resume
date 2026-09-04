@@ -1,3 +1,4 @@
+import { lookup } from "node:dns/promises";
 import { BlockList, isIP } from "node:net";
 
 function normalizeHostname(hostname: string) {
@@ -70,6 +71,61 @@ export function parseUrl(input: string) {
 	} catch {
 		return null;
 	}
+}
+
+export type HostLookupResult = Readonly<{ address: string; family: number }>;
+export type HostLookup = (hostname: string) => Promise<readonly HostLookupResult[]>;
+
+const systemHostLookup: HostLookup = (hostname) => lookup(hostname, { all: true, verbatim: true });
+
+/**
+ * Resolve every address currently published for a hostname and reject the
+ * entire destination if any answer is non-public. Rejecting mixed public and
+ * private answers is intentional: an attacker must not be able to influence
+ * which answer the downstream HTTP stack chooses.
+ *
+ * This closes hostname-only SSRF validation gaps. Callers performing the actual
+ * HTTP request should still disable or revalidate redirects and, where their
+ * HTTP client permits it, pin the validated address to eliminate DNS-rebinding
+ * time-of-check/time-of-use races.
+ */
+export async function resolvePublicHostAddresses(
+	hostname: string,
+	options: { lookup?: HostLookup } = {},
+): Promise<readonly string[]> {
+	const normalized = stripIpv6Brackets(normalizeHostname(hostname));
+	if (!normalized) throw new Error("INVALID_HOSTNAME");
+
+	const literalVersion = isIP(normalized);
+	if (literalVersion !== 0) {
+		if (isPrivateOrLoopbackHost(normalized)) throw new Error("NON_PUBLIC_HOST");
+		return [normalized];
+	}
+
+	if (isPrivateOrLoopbackHost(normalized)) throw new Error("NON_PUBLIC_HOST");
+
+	const resolver = options.lookup ?? systemHostLookup;
+	const answers = await resolver(normalized);
+	if (answers.length === 0) throw new Error("HOST_NOT_RESOLVED");
+
+	const addresses = [...new Set(answers.map(({ address }) => stripIpv6Brackets(normalizeHostname(address))))];
+	if (addresses.some((address) => isIP(address) === 0 || isPrivateOrLoopbackHost(address))) {
+		throw new Error("NON_PUBLIC_HOST");
+	}
+
+	return addresses;
+}
+
+export async function assertUrlResolvesToPublicAddresses(
+	input: string,
+	options: { lookup?: HostLookup } = {},
+): Promise<readonly string[]> {
+	const parsed = parseUrl(input);
+	if (!parsed) throw new Error("INVALID_URL");
+	if (parsed.username || parsed.password) throw new Error("INVALID_URL");
+	if (parsed.protocol !== "http:" && parsed.protocol !== "https:") throw new Error("INVALID_URL");
+
+	return resolvePublicHostAddresses(parsed.hostname, options);
 }
 
 type OAuthRedirectUriOptions = {
