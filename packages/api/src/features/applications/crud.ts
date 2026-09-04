@@ -1,10 +1,15 @@
-import { protectedProcedure } from "../../context";
+import { scopedProcedure } from "../../context";
 import { applicationDto } from "../../dto/application";
 import { resumeMutationRateLimit } from "../../middleware/rate-limit";
 import { applicationService } from "./service";
 
+const readApplication = scopedProcedure("application", "read");
+const createApplication = scopedProcedure("application", "create");
+const writeApplication = scopedProcedure("application", "write");
+const deleteApplication = scopedProcedure("application", "delete");
+
 export const crudRouter = {
-	list: protectedProcedure
+	list: readApplication
 		.route({
 			method: "GET",
 			path: "/applications",
@@ -26,7 +31,7 @@ export const crudRouter = {
 			}),
 		),
 
-	getById: protectedProcedure
+	getById: readApplication
 		.route({
 			method: "GET",
 			path: "/applications/{id}",
@@ -41,7 +46,7 @@ export const crudRouter = {
 		.output(applicationDto.getById.output)
 		.handler(({ input, context }) => applicationService.getById({ id: input.id, userId: context.user.id })),
 
-	create: protectedProcedure
+	create: createApplication
 		.route({
 			method: "POST",
 			path: "/applications",
@@ -57,7 +62,7 @@ export const crudRouter = {
 		.output(applicationDto.create.output)
 		.handler(({ input, context }) => applicationService.create({ userId: context.user.id, ...input })),
 
-	import: protectedProcedure
+	import: createApplication
 		.route({
 			method: "POST",
 			path: "/applications/import",
@@ -73,7 +78,7 @@ export const crudRouter = {
 		.output(applicationDto.import.output)
 		.handler(({ input, context }) => applicationService.importMany({ userId: context.user.id, items: input.items })),
 
-	update: protectedProcedure
+	update: writeApplication
 		.route({
 			method: "PUT",
 			path: "/applications/{id}",
@@ -89,7 +94,7 @@ export const crudRouter = {
 		.output(applicationDto.update.output)
 		.handler(({ input, context }) => applicationService.update({ userId: context.user.id, ...input })),
 
-	attachDocument: protectedProcedure
+	attachDocument: writeApplication
 		.route({
 			method: "POST",
 			path: "/applications/{id}/documents/{kind}",
@@ -131,7 +136,7 @@ export const crudRouter = {
 			});
 		}),
 
-	removeDocument: protectedProcedure
+	removeDocument: writeApplication
 		.route({
 			method: "DELETE",
 			path: "/applications/{id}/documents/{kind}",
@@ -149,7 +154,7 @@ export const crudRouter = {
 			applicationService.removeDocument({ id: input.id, userId: context.user.id, kind: input.kind }),
 		),
 
-	addNote: protectedProcedure
+	addNote: writeApplication
 		.route({
 			method: "POST",
 			path: "/applications/{id}/notes",
@@ -171,7 +176,7 @@ export const crudRouter = {
 			}),
 		),
 
-	updateTimelineEntry: protectedProcedure
+	updateTimelineEntry: writeApplication
 		.route({
 			method: "PUT",
 			path: "/applications/{id}/timeline/{entryId}",
@@ -186,7 +191,7 @@ export const crudRouter = {
 		.output(applicationDto.updateTimelineEntry.output)
 		.handler(({ input, context }) => applicationService.updateTimelineEntry({ ...input, userId: context.user.id })),
 
-	deleteTimelineEntry: protectedProcedure
+	deleteTimelineEntry: writeApplication
 		.route({
 			method: "DELETE",
 			path: "/applications/{id}/timeline/{entryId}",
@@ -202,7 +207,7 @@ export const crudRouter = {
 		.output(applicationDto.deleteTimelineEntry.output)
 		.handler(({ input, context }) => applicationService.deleteTimelineEntry({ ...input, userId: context.user.id })),
 
-	delete: protectedProcedure
+	delete: deleteApplication
 		.route({
 			method: "DELETE",
 			path: "/applications/{id}",
@@ -217,7 +222,7 @@ export const crudRouter = {
 		.output(applicationDto.delete.output)
 		.handler(({ input, context }) => applicationService.delete({ id: input.id, userId: context.user.id })),
 
-	bulkUpdate: protectedProcedure
+	bulkUpdate: writeApplication
 		.route({
 			method: "POST",
 			path: "/applications/bulk-update",
@@ -233,7 +238,7 @@ export const crudRouter = {
 		.output(applicationDto.bulkUpdate.output)
 		.handler(({ input, context }) => applicationService.bulkUpdate({ userId: context.user.id, ...input })),
 
-	bulkDelete: protectedProcedure
+	bulkDelete: deleteApplication
 		.route({
 			method: "POST",
 			path: "/applications/bulk-delete",
@@ -248,7 +253,7 @@ export const crudRouter = {
 		.output(applicationDto.bulkDelete.output)
 		.handler(({ input, context }) => applicationService.bulkDelete({ userId: context.user.id, ids: input.ids })),
 
-	stats: protectedProcedure
+	stats: readApplication
 		.route({
 			method: "GET",
 			path: "/applications/stats",
@@ -262,7 +267,7 @@ export const crudRouter = {
 		.output(applicationDto.stats.output)
 		.handler(({ context }) => applicationService.stats({ userId: context.user.id })),
 
-	tags: protectedProcedure
+	tags: readApplication
 		.route({
 			method: "GET",
 			path: "/applications/tags",
