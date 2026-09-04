@@ -4,6 +4,7 @@
 	"type": "module",
 	"private": true,
 	"exports": {
+		"./capabilities": "./src/capabilities/index.ts",
 		"./context": "./src/context.ts",
 		"./features/agent/runs": "./src/features/agent/runs.ts",
 		"./features/flags": "./src/features/flags/index.ts",
