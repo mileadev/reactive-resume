@@ -1,10 +1,11 @@
 import { ORPCError } from "@orpc/server";
 import z from "zod";
-import { protectedProcedure } from "../../context";
+import { scopedProcedure } from "../../context";
 import { storageDeleteRateLimit, storageUploadRateLimit } from "../../middleware/rate-limit";
 import { getStorageService, isImageFile, processImageForUpload, uploadFile } from "./service";
 
 const storageService = getStorageService();
+const writeStorage = scopedProcedure("storage", "write");
 
 const fileSchema = z.file().max(10 * 1024 * 1024, "File size must be less than 10MB");
 
@@ -21,7 +22,7 @@ function isUnsafeStorageKey(key: string): boolean {
 }
 
 export const storageRouter = {
-	uploadFile: protectedProcedure
+	uploadFile: writeStorage
 		.route({
 			tags: ["Internal"],
 			operationId: "uploadFile",
@@ -65,7 +66,7 @@ export const storageRouter = {
 			};
 		}),
 
-	deleteFile: protectedProcedure
+	deleteFile: writeStorage
 		.route({
 			tags: ["Internal"],
 			operationId: "deleteFile",
