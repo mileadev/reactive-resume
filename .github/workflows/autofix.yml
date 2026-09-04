@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Check for merge conflict markers
         run: |
@@ -38,7 +40,12 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      # Knip may return non-zero after applying the fixes it can make. Do not
+      # prevent Biome/Markdownlint from producing their canonical fixes; the
+      # strict Knip verification below still fails the workflow when issues
+      # remain after the autofix pass.
       - name: Remove Unused Dependencies
+        continue-on-error: true
         run: pnpm knip --fix
 
       - name: Lint and Format
@@ -46,3 +53,6 @@ jobs:
 
       - name: Autofix
         uses: autofix-ci/action@7a166d7532b277f34e16238930461bf77f9d7ed8
+
+      - name: Verify No Unused Code or Dependencies Remain
+        run: pnpm knip
