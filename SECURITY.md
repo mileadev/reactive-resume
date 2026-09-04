@@ -2,33 +2,32 @@
 
 ## Supported Versions
 
-Reactive Resume provides security updates for version `5.0.x` and newer.
-Earlier major versions are no longer supported.
+This fork provides security fixes for the current `5.x` line. Older major
+versions are not supported by this repository.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| >= 5.0  | :white_check_mark: |
+| 5.x     | :white_check_mark: |
 | 4.x     | :x:                |
 | < 4.0   | :x:                |
 
 ## Reporting a Vulnerability
 
-If you believe you have found a security vulnerability, please report it
-privately instead of opening a public issue.
+Do not open a public issue for a suspected vulnerability.
 
-Preferred reporting channels:
+Use GitHub private vulnerability reporting for this repository:
 
-- Use GitHub's private vulnerability reporting for this repository.
-- If that is unavailable, email `hello@amruthpillai.com` with the subject
-  `Security Vulnerability: Reactive Resume`.
+https://github.com/mileadev/reactive-resume/security/advisories/new
 
-Please include as much detail as possible, including:
+Include enough evidence to reproduce and triage the issue safely:
 
-- A description of the vulnerability and its impact.
-- Steps to reproduce or a proof of concept.
-- Affected versions, configuration, or deployment details.
-- Any relevant logs, screenshots, or links.
+- vulnerability description and realistic impact;
+- affected version, commit, configuration, and deployment mode;
+- minimal reproduction steps or proof of concept;
+- relevant logs, screenshots, traces, or links with secrets and personal data
+  removed;
+- suggested remediation or disclosure constraints, when applicable.
 
-You can expect an initial response within 7 days. If the report is accepted,
-we will coordinate remediation and disclosure timing with you before publishing
-details publicly.
+Please avoid testing against systems or data you do not own or have explicit
+authorization to assess. Coordinated disclosure details will be agreed with the
+reporter after validation and remediation planning.
